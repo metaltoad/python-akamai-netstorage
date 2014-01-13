@@ -147,12 +147,11 @@ class Binding(object):
             entry = {
                 'type': attribs['type'],
                 'name': attribs['name'],
-                'mtime': attribs['mtime'],
                 'path': path_join(path, attribs['name']) if path else attribs['name']
             }
 
             # Optional keys
-            for k in ('size', 'target', ):
+            for k in ('size', 'target', 'mtime', 'md5'):
                 try:
                     entry[k] = attribs[k]
                 except KeyError:
