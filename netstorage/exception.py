@@ -36,3 +36,7 @@ class AkamaiFileNotFoundException(AkamaiError):
 
 class AkamaiForbiddenException(AkamaiError):
     pass
+
+
+class AkamaiServiceUnavailableException(AkamaiError):
+    pass
