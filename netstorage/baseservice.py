@@ -163,14 +163,13 @@ class Binding(object):
     def upload(self, cp_code=None, local_path='', ns_path=''):
         params = {}
         params['action'] = Actions.UPLOAD
-        params['md5'] = self.__hashfile(open(local_path, 'rb'), md5())
+
         params['size'] = getsize(local_path)
         params['mtime'] = getmtime(local_path)
         method=Methods.POST
-
         # Open a stream to the file in binary mode
         try:
-            params['md5'] = __hashfile(local_path, md5())
+            params['md5'] = self.__hashfile(open(local_path, 'rb'), md5())
             contents = open(local_path, 'rb')
         except Exception:
             return
