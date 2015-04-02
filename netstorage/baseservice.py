@@ -38,6 +38,12 @@ class Actions(object):
     MKDIR = 'mkdir'
     UPLOAD = 'upload'
     STAT = 'stat'
+    # To implement...
+    LIST = 'list'
+    RMDIR = 'rmdir'
+    DOWNLOAD = 'download'
+    MTIME = 'mtime'
+    SYMLINK = 'symlink'
 
 
 class Binding(object):
@@ -164,8 +170,7 @@ class Binding(object):
 
         # Open a stream to the file in binary mode
         try:
-            #http://stackoverflow.com/questions/3431825/generating-a-md5-checksum-of-a-file TODO: use memory efficent way
-            params['md5'] = md5(open(local_path, 'rb').read()).hexdigest()
+            params['md5'] = __hashfile(local_path, md5())
             contents = open(local_path, 'rb')
         except Exception:
             return
@@ -174,11 +179,11 @@ class Binding(object):
         if status == 200:
             return response
         elif status == 403:
-            raise AkamaiForbiddenException((cp_code or self.cp_code, path, response, status, ))
+            raise AkamaiForbiddenException((cp_code or self.cp_code, ns_path, response, status, ))
         elif status == 404:
-            raise AkamaiFileNotFoundException((cp_code or self.cp_code, path, response, status, ))
+            raise AkamaiFileNotFoundException((cp_code or self.cp_code, ns_path, response, status, ))
         elif status == 503:
-            raise AkamaiServiceUnavailableException((cp_code or self.cp_code, path, response, status, ))
+            raise AkamaiServiceUnavailableException((cp_code or self.cp_code, ns_path, response, status, ))
         return response, status
 
 
