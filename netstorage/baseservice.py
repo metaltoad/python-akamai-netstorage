@@ -52,6 +52,8 @@ class Binding(object):
     key_name = None
     cp_code = None
 
+    filesize = 0
+
     def __init__(self, account, key, key_name, cp_code=None, path=None):
         self.host = '%s%s' % (account, AKAMAI_HOST_POSTFIX)
         self.key = key
@@ -81,7 +83,10 @@ class Binding(object):
     def __get_headers(self, action):
         return {
             'Host': self.host,
-            'X-Akamai-ACS-Action': action
+            'X-Akamai-ACS-Action': action,
+            'Content-Length': str(self.filesize),
+            'Accept': '*/*',
+            'Accept-Encoding': '*'
         }
 
     # Transform the element into a well know dict format
@@ -133,7 +138,7 @@ class Binding(object):
         while len(buf) > 0:
             hasher.update(buf)
             buf = afile.read(blocksize)
-        return hasher.digest()
+        return hasher.hexdigest()
 
     def send(self, cp_code, path, params, method=Methods.GET, body=None):
         self.__check_params(params)
@@ -155,6 +160,7 @@ class Binding(object):
         if method == Methods.DELETE and not self.allow_delete:
             raise AkamaiDeleteNotAllowedException()
 
+
         r = requests.request(method, url, headers=self.__get_headers(action),
                              auth=AkamaiAuth(self.key, self.key_name, relative, action), data=body)
 
@@ -165,6 +171,7 @@ class Binding(object):
         params['action'] = Actions.UPLOAD
 
         params['size'] = getsize(local_path)
+        self.filesize = params['size']
         params['mtime'] = getmtime(local_path)
         method=Methods.POST
         # Open a stream to the file in binary mode
@@ -175,6 +182,7 @@ class Binding(object):
             return
 
         response, status = self.send(cp_code, ns_path, params, method, body=contents)
+        self.filesize = 0
         if status == 200:
             return response
         elif status == 403:
